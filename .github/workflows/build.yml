@@ -12,6 +12,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+    outputs:
+      release: ${{ steps.release_check.outputs.release }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,18 +28,17 @@ jobs:
         run: npm install
 
       - name: Build App
+        shell: bash
         run: |
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             npm run build:mac
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            npm run build
           else
             npm run build
           fi
-        shell: bash
 
       - name: Check if should release
         id: release_check
+        shell: bash
         run: |
           if [[ "${GITHUB_REF}" == *official* || "${{ github.event.head_commit.message }}" == *official* ]]; then
             echo "release=true" >> $GITHUB_OUTPUT
@@ -55,10 +57,9 @@ jobs:
             dist/*.AppImage
             dist/*.deb
 
- 
   release:
     needs: build
-    if: ${{ needs.build.outputs.release == 'true' }}
+    if: needs.build.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
