@@ -7,7 +7,8 @@
     "electron",
     "beta",
     "desktop",
-    "exe"
+    "exe",
+    "tree"
   ],
   "homepage": "https://github.com/treeentertainment/KIOSK#readme",
   "bugs": {
@@ -35,6 +36,7 @@
     "build:all": "electron-builder --win --mac --linux"
   },
   "build": {
+    "publish": null,
     "productName": "TREE KIOSK V4",
     "win": {
       "icon": "icons/icon.ico"
