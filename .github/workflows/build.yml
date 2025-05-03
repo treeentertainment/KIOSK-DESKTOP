@@ -3,7 +3,7 @@ name: Build and Release TREE KIOSK V4
 on:
   push:
     branches:
-      - '**'  # 모든 브랜치 대상
+      - '**'
 
 jobs:
   build:
@@ -24,16 +24,26 @@ jobs:
         with:
           node-version: 18
 
+      - name: Install Wine (Linux only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo mkdir -pm755 /etc/apt/keyrings
+          sudo apt update
+          sudo apt install -y wine64 wine32
+
       - name: Install dependencies
         run: npm install
 
-      - name: Build App
+      - name: Build App (per OS)
         shell: bash
         run: |
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             npm run build:mac
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            npm run build:win
           else
-            npm run build
+            npm run build:linux
           fi
 
       - name: Check if should release
