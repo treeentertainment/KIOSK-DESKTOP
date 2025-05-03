@@ -1,4 +1,4 @@
-name: Build
+name: Build and (optionally) Release Electron App
 
 on:
   push:
@@ -63,3 +63,45 @@ jobs:
           files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  delete-history:
+    if: contains(github.event.head_commit.message, 'delete-history')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code (to access exclude.txt)
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        uses: cli/cli-action@v1
+
+      - name: Setup authentication
+        run: echo "${{ secrets.PERSONAL_TOKEN }}" | gh auth login --with-token
+
+      - name: Create exclude.txt if not exists
+        run: |
+          touch exclude.txt
+
+      - name: Read exclude.txt to get excluded run IDs
+        id: get_excludes
+        run: |
+          EXCLUDES=$(cat exclude.txt || echo "")
+          echo "::set-output name=excluded_runs::$EXCLUDES"
+
+      - name: Delete previous runs (excluding exclude.txt list)
+        env:
+          REPO: ${{ github.repository }}
+          EXCLUDED_RUNS: ${{ steps.get_excludes.outputs.excluded_runs }}
+        run: |
+          gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
+            # Skip excluded runs
+            if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
+              echo "Deleting run $run_id"
+              gh api -X DELETE "repos/$REPO/actions/runs/$run_id"
+            fi
+          done
+
+      - name: Append this run ID to exclude.txt
+        run: |
+          echo "${{ github.run_id }}" >> exclude.txt
+          cat exclude.txt
