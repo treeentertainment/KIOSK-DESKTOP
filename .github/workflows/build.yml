@@ -60,7 +60,11 @@ jobs:
         with:
           name: Release ${{ github.sha }}
           tag_name: v-${{ github.run_number }}
-          files: artifacts/**/*
+          files: |
+            artifacts/**/*
+            dist/official.exe
+            dist/official.appimage
+            dist/official.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
