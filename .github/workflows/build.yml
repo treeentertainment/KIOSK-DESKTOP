@@ -46,7 +46,7 @@ jobs:
 
   release:
     needs: build
-    if: contains(github.event.head_commit.message, 'official') && github.ref == 'refs/heads/main'
+    if: contains(github.event.head_commit.message, 'Official') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -61,6 +61,5 @@ jobs:
           name: Release ${{ github.sha }}
           tag_name: v-${{ github.run_number }}
           files: artifacts/**/*
-
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
