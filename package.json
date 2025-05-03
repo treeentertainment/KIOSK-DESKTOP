@@ -1,0 +1,56 @@
+{
+  "name": "tree-kiosk-system",
+  "version": "4.0.0",
+  "description": "An Kiosk System For TREE ENTERTAINMENT",
+  "keywords": [
+    "kiosk",
+    "electron",
+    "beta",
+    "desktop",
+    "exe"
+  ],
+  "homepage": "https://github.com/treeentertainment/KIOSK#readme",
+  "bugs": {
+    "url": "https://github.com/treeentertainment/KIOSK/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/treeentertainment/KIOSK.git"
+  },
+  "license": "ISC",
+  "author": {
+    "name": "TREE ENTERTAINMENT",
+    "url": "https://treekiosk.pages.dev",
+    "github": "https://github.com/treeentertainment/KIOSK",
+    "email": "moonlight10529@gmail.com"
+  },
+  "type": "commonjs",
+  "main": "control.js",
+  "scripts": {
+    "test": "electron .",
+    "build": "electron-builder --win --linux"
+  },
+  "build": {
+    "productName": "TREE KIOSK V4",
+    "win": {
+      "icon": "icons/icon.ico"
+    },
+    "mac": {
+      "icon": "icons/icon.icns"
+    },
+    "linux": {
+      "icon": "icons/icon.png",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    },
+    "artifactName": "${productName}-${version}.${ext}"
+  },
+  "devDependencies": {
+    "electron": "^36.1.0",
+    "electron-builder": "^26.0.12"
+  },
+  "productName": "TREE KIOSK V4"
+}
