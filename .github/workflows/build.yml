@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload artifacts
         if: steps.release_check.outputs.release == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: kiosk-${{ runner.os }}
           path: |
