@@ -28,7 +28,11 @@
   "main": "control.js",
   "scripts": {
     "test": "electron .",
-    "build": "electron-builder --win --linux"
+    "build": "electron-builder --win --linux",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder --win --mac --linux"
   },
   "build": {
     "productName": "TREE KIOSK V4",
