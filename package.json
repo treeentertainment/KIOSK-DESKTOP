@@ -28,7 +28,7 @@
   "main": "control.js",
   "scripts": {
     "test": "electron .",
-    "build": "electron-builder --win --linux",
+    "build": "electron-builder"
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win",
     "build:linux": "electron-builder --linux",
