@@ -90,14 +90,15 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           EXCLUDED_RUNS: ${{ steps.get_excludes.outputs.excluded_runs }}
-        run: |
-          gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Add this line to pass the token
+          run: |
+            gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
             # Skip excluded runs
             if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
               echo "Deleting run $run_id"
               gh api -X DELETE "repos/$REPO/actions/runs/$run_id" --silent -v
             fi
-          done
+            done
 
       - name: Append this run ID to exclude.txt
         run: |
