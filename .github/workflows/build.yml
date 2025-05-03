@@ -1,0 +1,85 @@
+name: Build and Release TREE KIOSK V4
+
+on:
+  push:
+    branches:
+      - '**'  # 모든 브랜치 대상
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build App
+        run: |
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            npm run build:mac
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            npm run build
+          else
+            npm run build
+          fi
+        shell: bash
+
+      - name: Check if should release
+        id: release_check
+        run: |
+          if [[ "${GITHUB_REF}" == *official* || "${{ github.event.head_commit.message }}" == *official* ]]; then
+            echo "release=true" >> $GITHUB_OUTPUT
+          else
+            echo "release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload artifacts
+        if: steps.release_check.outputs.release == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: kiosk-${{ runner.os }}
+          path: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.deb
+
+  release:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+
+      - name: Create GitHub Release
+        if: ${{ github.event.head_commit.message contains 'official' || github.ref contains 'official' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "release-${{ github.run_number }}"
+          name: "TREE KIOSK v${{ github.run_number }}"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets
+        if: ${{ github.event.head_commit.message contains 'official' || github.ref contains 'official' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
