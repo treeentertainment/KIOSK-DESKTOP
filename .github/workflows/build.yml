@@ -10,7 +10,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: macos-latest
+            args: --mac
+            artifact-name: mac-artifact
+
+          - os: ubuntu-latest
+            args: --linux
+            artifact-name: linux-artifact
+
+          - os: windows-latest
+            args: --win
+            artifact-name: win-artifact
 
     steps:
       - name: Checkout code
@@ -25,12 +36,12 @@ jobs:
         run: npm install
 
       - name: Build Electron App
-        run: npm run build
+        run: npm run build -- ${{ matrix.args }}
 
-      - name: Upload build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-artifact
+          name: ${{ matrix.artifact-name }}
           path: dist/
 
   release:
@@ -39,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -50,5 +61,6 @@ jobs:
           name: Release ${{ github.sha }}
           tag_name: v-${{ github.run_number }}
           files: artifacts/**/*
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
