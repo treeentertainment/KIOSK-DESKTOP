@@ -76,14 +76,6 @@ jobs:
       - name: Checkout code (to access exclude.txt)
         uses: actions/checkout@v4
 
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install gh
-
-      - name: Setup authentication
-        run: echo "${{ secrets.PERSONAL_TOKEN }}" | gh auth login --with-token
-
       - name: Create exclude.txt if not exists
         run: |
           touch exclude.txt
@@ -103,7 +95,7 @@ jobs:
             # Skip excluded runs
             if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
               echo "Deleting run $run_id"
-              gh api -X DELETE "repos/$REPO/actions/runs/$run_id"
+              gh api -X DELETE "repos/$REPO/actions/runs/$run_id" --silent -v
             fi
           done
 
