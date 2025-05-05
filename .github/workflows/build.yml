@@ -43,10 +43,28 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: dist/
+          retention-days: 3
+
+  check-release:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+    steps:
+      - name: Extract commit description and check for "Official"
+        id: check
+        run: |
+          DESC=$(git log -1 --pretty=%B | tail -n +2)
+          echo "Commit Description:"
+          echo "$DESC"
+          if echo "$DESC" | grep -q "Official"; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
 
   release:
-    needs: build
-    if: contains(github.event.head_commit.message, 'Official') && github.ref == 'refs/heads/main'
+    needs: [build, check-release]
+    if: needs.check-release.outputs.should_release == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -60,16 +78,30 @@ jobs:
         with:
           name: Release ${{ github.sha }}
           tag_name: v-${{ github.run_number }}
-          files: |
-            artifacts/**/*
-            dist/official.exe
-            dist/official.appimage
-            dist/official.dmg
+          files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  check-delete-history:
+    runs-on: ubuntu-latest
+    outputs:
+      should_delete: ${{ steps.check.outputs.should_delete }}
+    steps:
+      - name: Extract commit description and check for "delete-history"
+        id: check
+        run: |
+          DESC=$(git log -1 --pretty=%B | tail -n +2)
+          echo "Commit Description:"
+          echo "$DESC"
+          if echo "$DESC" | grep -q "delete-history"; then
+            echo "should_delete=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_delete=false" >> $GITHUB_OUTPUT
+          fi
+
   delete-history:
-    if: contains(github.event.head_commit.message, 'delete-history')
+    needs: check-delete-history
+    if: needs.check-delete-history.outputs.should_delete == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -84,21 +116,20 @@ jobs:
         id: get_excludes
         run: |
           EXCLUDES=$(cat exclude.txt || echo "")
-          echo "::set-output name=excluded_runs::$EXCLUDES"
+          echo "excluded_runs=$EXCLUDES" >> $GITHUB_OUTPUT
 
       - name: Delete previous runs (excluding exclude.txt list)
         env:
           REPO: ${{ github.repository }}
           EXCLUDED_RUNS: ${{ steps.get_excludes.outputs.excluded_runs }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Add this line to pass the token
-          run: |
-            gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
-            # Skip excluded runs
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
             if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
               echo "Deleting run $run_id"
               gh api -X DELETE "repos/$REPO/actions/runs/$run_id" --silent -v
             fi
-            done
+          done
 
       - name: Append this run ID to exclude.txt
         run: |
