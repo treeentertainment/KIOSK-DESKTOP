@@ -127,7 +127,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           EXCLUDED_RUNS: ${{ steps.get_excludes.outputs.excluded_runs }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}  # 사용자 생성 PAT 토큰
         run: |
           gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
             if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
