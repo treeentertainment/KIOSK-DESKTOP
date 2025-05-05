@@ -82,9 +82,9 @@ jobs:
           name: Release ${{ github.sha }}
           tag_name: v-${{ github.run_number }}
           files: |
-                   artifacts/**/*.exe
-                   artifacts/**/*.AppImage
-                   artifacts/**/*.dmg
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/**/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -123,17 +123,20 @@ jobs:
       - name: Read exclude.txt to get excluded run IDs
         id: get_excludes
         run: |
-          EXCLUDES=$(cat exclude.txt || echo "")
+          EXCLUDES=$(paste -sd, exclude.txt)
           echo "excluded_runs=$EXCLUDES" >> $GITHUB_OUTPUT
 
       - name: Delete previous runs (excluding exclude.txt list)
         env:
           REPO: ${{ github.repository }}
           EXCLUDED_RUNS: ${{ steps.get_excludes.outputs.excluded_runs }}
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}  # 사용자 생성 Personal Access Token
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
+          IFS=',' read -ra EXCLUDE_ARRAY <<< "$EXCLUDED_RUNS"
+          CURRENT_RUN_ID=${{ github.run_id }}
+
           gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
-            if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
+            if [[ ! " ${EXCLUDE_ARRAY[@]} " =~ " $run_id " && "$run_id" != "$CURRENT_RUN_ID" ]]; then
               echo "Deleting run $run_id"
               gh api -X DELETE "repos/$REPO/actions/runs/$run_id" --silent
             fi
