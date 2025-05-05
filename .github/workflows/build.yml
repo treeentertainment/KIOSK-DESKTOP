@@ -50,6 +50,9 @@ jobs:
     outputs:
       should_release: ${{ steps.check.outputs.should_release }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Extract commit description and check for "Official"
         id: check
         run: |
@@ -87,6 +90,9 @@ jobs:
     outputs:
       should_delete: ${{ steps.check.outputs.should_delete }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Extract commit description and check for "delete-history"
         id: check
         run: |
