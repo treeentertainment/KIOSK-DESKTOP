@@ -111,12 +111,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code (to access exclude.txt)
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create exclude.txt if not exists
-        run: |
-          touch exclude.txt
+        run: touch exclude.txt
 
       - name: Read exclude.txt to get excluded run IDs
         id: get_excludes
@@ -133,7 +132,7 @@ jobs:
           gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
             if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
               echo "Deleting run $run_id"
-              gh api -X DELETE "repos/$REPO/actions/runs/$run_id" --silent -v
+              gh api -X DELETE "repos/$REPO/actions/runs/$run_id" --silent
             fi
           done
 
