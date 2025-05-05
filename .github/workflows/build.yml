@@ -127,7 +127,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           EXCLUDED_RUNS: ${{ steps.get_excludes.outputs.excluded_runs }}
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}  # 사용자 생성 PAT 토큰
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}  # 사용자 생성 Personal Access Token
         run: |
           gh api "repos/$REPO/actions/runs" --paginate --jq '.workflow_runs[].id' | while read run_id; do
             if [[ "$EXCLUDED_RUNS" != *"$run_id"* && "$run_id" != "${{ github.run_id }}" ]]; then
@@ -136,7 +136,26 @@ jobs:
             fi
           done
 
+  save-run-id:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create exclude.txt if not exists
+        run: touch exclude.txt
+
       - name: Append this run ID to exclude.txt
         run: |
           echo "${{ github.run_id }}" >> exclude.txt
+          sort -u exclude.txt -o exclude.txt
           cat exclude.txt
+
+      - name: Commit and push exclude.txt
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add exclude.txt
+          git commit -m "Add run ID to exclude.txt"
+          git push
