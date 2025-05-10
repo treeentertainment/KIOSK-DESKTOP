@@ -25,9 +25,14 @@ window.onload = function() {
   }).catch((error) => {
      window.location.href = "index.html"; // 첫 페이지로 이동
     }); 
-  selectoption(window.data);
 };
 
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'item') {
+    const item = event.data.data;
+    selectoption(item);
+  }
+});
 
 var email = JSON.parse(window.localStorage.getItem('email'));
 var number = JSON.parse(window.localStorage.getItem('number'));
