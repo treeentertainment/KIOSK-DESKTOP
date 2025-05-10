@@ -45,7 +45,6 @@ window.onload = function() {
     }); 
  }
 
-
 window.addEventListener('message', (event) => {  
   if (event.data.type === 'UpdateOrder' && event.origin === window.location.origin) {
     updatequantity(Number(event.data.id), event.data.quantity);
@@ -273,14 +272,19 @@ function display() {
 }
 
 function selectoption(event, item) {
-  event.preventDefault(); // 기본 제출 동작 방지
+  event.preventDefault();
 
-  if(orderwindow) {
-    orderwindow.close(); // 기존 창 닫기
-    orderwindow = null; // 참조 초기화
+  if (orderwindow && !orderwindow.closed) {
+    orderwindow.close();
+    orderwindow = null;
   }
-  orderwindow = window.open(`cart.html`, '_blank'); // 새 탭에서 열기
-  orderwindow.data = item; // 데이터 전달
+
+  orderwindow = window.open('cart.html', '_blank');
+
+  // 새 창이 완전히 로드된 후 데이터 전송
+  orderwindow.addEventListener('load', () => {
+    orderwindow.postMessage({ type: 'item', data: item }, '*');
+  });
 }
 
 function displayorders(number) {
@@ -480,7 +484,7 @@ document.getElementById('gopay').addEventListener('click', function(event) {
 
 function submitorder(event) {
   event.preventDefault(); // 기본 제출 동작 방지
-  if(orderwindow) {
+  if (orderwindow && !orderwindow.closed) {
     orderwindow.close(); // 기존 창 닫기
     orderwindow = null; // 참조 초기화
   }
