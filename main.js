@@ -32,6 +32,20 @@ document.getElementById('services-tab').addEventListener('click', () => setHash(
 
 document.addEventListener("DOMContentLoaded", () => display());
 
+window.onload = function() {
+    firebase.database().ref('/people/data/' + number + '/state').on('value', (snapshot) => {
+    const state = snapshot.val();
+    if (state && Number(state.state) > 1) {
+      window.location.href = "index.html"; // 첫 페이지로 이동
+    } else {
+      window.localStorage.setItem('name', JSON.stringify(data.name));
+    }
+  }).catch((error) => {
+     window.location.href = "index.html"; // 첫 페이지로 이동
+    }); 
+ }
+
+
 window.addEventListener('message', (event) => {  
   if (event.data.type === 'UpdateOrder' && event.origin === window.location.origin) {
     updatequantity(Number(event.data.id), event.data.quantity);
@@ -61,8 +75,15 @@ firebase.auth().onAuthStateChanged((user) => {
             firebase.database().ref('/people/data/' + data.store).once('value').then((snapshot) => {
               const data = snapshot.val();
               if (data && data.email === fixedemail) {
+             firebase.database().ref('/people/data/' + datacheck.store + '/state').on('value', (snapshot) => {
+              const state = snapshot.val();
+              if (state && Number(state.state) > 1) {
+               window.location.href = "index.html"; // 첫 페이지로 이동
+              } else {
                 window.localStorage.setItem('name', JSON.stringify(data.name));
-            } else {
+              }
+            });           
+           } else {
                 window.location.href = "index.html"; // 로그인 페이지로 이동
               }
             });
@@ -252,19 +273,14 @@ function display() {
 }
 
 function selectoption(event, item) {
-  event.preventDefault();
+  event.preventDefault(); // 기본 제출 동작 방지
 
-  if (orderwindow && !orderwindow.closed) {
-    orderwindow.close();
-    orderwindow = null;
+  if(orderwindow) {
+    orderwindow.close(); // 기존 창 닫기
+    orderwindow = null; // 참조 초기화
   }
-
-  orderwindow = window.open('cart.html', '_blank');
-
-  // 새 창이 완전히 로드된 후 데이터 전송
-  orderwindow.addEventListener('load', () => {
-    orderwindow.postMessage({ type: 'item', data: item }, '*');
-  });
+  orderwindow = window.open(`cart.html`, '_blank'); // 새 탭에서 열기
+  orderwindow.data = item; // 데이터 전달
 }
 
 function displayorders(number) {
@@ -464,12 +480,10 @@ document.getElementById('gopay').addEventListener('click', function(event) {
 
 function submitorder(event) {
   event.preventDefault(); // 기본 제출 동작 방지
-
-  if (orderwindow && !orderwindow.closed) {
-    orderwindow.close();
-    orderwindow = null;
+  if(orderwindow) {
+    orderwindow.close(); // 기존 창 닫기
+    orderwindow = null; // 참조 초기화
   }
-
   orderwindow = window.open(`checkout.html`, '_blank'); // 새 탭에서 열기
 }
 
@@ -479,7 +493,7 @@ function gohome() {
   window.location.href = "index.html";
   
 }
-  
+
 document.getElementById("gohome").addEventListener("click", function () {
  document.getElementById("areyousure").classList.add("active");
 });
