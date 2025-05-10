@@ -14,12 +14,19 @@ const auth = firebase.auth();
 const db = firebase.firestore();    
 const realtimeDb = firebase.database();
 
-window.addEventListener('message', (event) => {
-  if (event.data?.type === 'item') {
-    const item = event.data.data;
-    selectoption(item);
-  }
-});
+window.onload = function() {
+    firebase.database().ref('/people/data/' + number + '/state').on('value', (snapshot) => {
+    const state = snapshot.val();
+    if (state && Number(state.state) > 1) {
+      window.location.href = "index.html"; // 첫 페이지로 이동
+    } else {
+      window.localStorage.setItem('name', JSON.stringify(data.name));
+    }
+  }).catch((error) => {
+     window.location.href = "index.html"; // 첫 페이지로 이동
+    }); 
+  selectoption(window.data);
+};
 
 
 var email = JSON.parse(window.localStorage.getItem('email'));
