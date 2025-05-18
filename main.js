@@ -162,6 +162,28 @@ function display() {
         selectoption(event, item);
       };
 
+      if(item.status === false) {
+          card.style.pointerEvents = 'none';
+        
+          const overlay = document.createElement('div');
+          overlay.textContent = '품절';
+          overlay.style.position = 'absolute';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.display = 'flex';
+          overlay.style.justifyContent = 'center';
+          overlay.style.alignItems = 'center';
+          overlay.style.zIndex = '10';
+          overlay.style.background = 'rgba(255, 255, 255, 0.6)';
+          overlay.style.backdropFilter = 'none'; // 혹시 inherit 되는 경우 방지
+          overlay.style.fontWeight = 'bold';
+        
+          card.style.position = 'relative';
+          card.appendChild(overlay);
+     }
+
       const cardimage = document.createElement('div');
       cardimage.classList.add("card-image");
       
