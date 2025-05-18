@@ -325,11 +325,15 @@ function selectoption(data) {
       if (maxvalue <= 0) {
         isfull();
         return;
-      } else {
+     } else {
         input.max = maxvalue;
       }
     } else if (maxvalue !== "null") {
       input.max = maxvalue;
+    }
+
+    if(data.status === false) {
+        window.close();
     }
 
     const plusBtn = document.createElement('button');
