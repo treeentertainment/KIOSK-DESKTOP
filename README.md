@@ -13,13 +13,14 @@
 ](https://github.com/treeentertainment/KIOSK-DESKTOP/releases/latest)
 
 > ## 저작권
-
-[![Static Badge](https://img.shields.io/badge/Q-green?style=for-the-badge&logo=github)
-](https://github.com/202420505)
+> 
+[![Static Badge](https://img.shields.io/badge/M-blue?style=for-the-badge&logo=github)
+](https://github.com/channel101)
 
 > ## 문의
 
-[moonlight10529@gmail.com](mailto:moonlight10529@gmail.com)
+[![Static Badge](https://img.shields.io/badge/M-blue?style=for-the-badge&logo=github)
+](mailto:contact@treeentertainment.tech)
 
 > ## URL
 
